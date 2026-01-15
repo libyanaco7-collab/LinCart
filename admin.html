@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .toast {
+            z-index: 20000 !important;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script>
+        // Immediate Auth Check
+        if (!app.currentUser) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+
+<body class="admin-body">
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="admin-logo" style="justify-content: center; border-bottom: 2px solid var(--admin-accent);">
+                <i class="fa-solid fa-utensils" style="margin-right: 10px;"></i>
+                <h2 id="sidebar-app-name">...</h2>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#home" class="menu-link active">
+                        <i class="fa-solid fa-border-all"></i>
+                        الرئيسية
+                    </a>
+                </li>
+                <li>
+                    <a href="#items" class="menu-link">
+                        <i class="fa-solid fa-utensils"></i>
+                        الأصناف
+                    </a>
+                </li>
+                <li>
+                    <a href="#orders" class="menu-link">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        الطلبات
+                        <span id="sidebar-order-count" class="badge"
+                            style="position:static; margin-right:auto; background:red; display:none; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px;">0</span>
+                    </a>
+                </li>
+                <li id="sidebar-users-item" style="display: none;">
+                    <a href="#users" class="menu-link">
+                        <i class="fa-solid fa-users-gear"></i>
+                        المستخدمين
+                    </a>
+                </li>
+                <li>
+                    <a href="#settings" class="menu-link">
+                        <i class="fa-solid fa-gear"></i>
+                        الإعدادات
+                    </a>
+                </li>
+                <li style="margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <a href="index.html" target="_blank" class="menu-link" style="padding: 0.6rem 1rem;">
+                        <i class="fa-solid fa-eye"></i>
+                        عرض المتجر
+                    </a>
+                </li>
+            </ul>
+
+            <div class="admin-user-profile" style="cursor: pointer;" onclick="app.logout()">
+                <div class="user-avatar" style="background: var(--admin-accent); color: #000;">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div class="user-info">
+                    <h4 id="sidebar-user-name" style="color:#fff;">مدير النظام</h4>
+                    <span style="color: #2ecc71; font-size: 0.7rem;"><i class="fa-solid fa-circle"
+                            style="font-size:0.4rem;"></i> متصل الآن</span>
+                </div>
+                <i class="fa-solid fa-right-from-bracket logout-icon" style="color: #ef4444 !important;"></i>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section">
+                <!-- Welcome Header -->
+                <div class="welcome-banner">
+                    <div class="welcome-content">
+                        <p>أهلاً بك في</p>
+                        <h1 id="dashboard-rest-name">...</h1>
+                        <p id="dashboard-welcome-msg">نتمنى لك يوماً سعيداً</p>
+                    </div>
+                    <div class="welcome-clock">
+                        <div id="dashboard-time">00:00</div>
+                        <div id="dashboard-date">...</div>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="admin-card stat-card">
+                        <div class="stat-icon icon-blue">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </div>
+                        <div class="stat-data">
+                            <div class="stat-val" id="stats-orders">0</div>
+                            <div class="stat-label">إجمالي الطلبات</div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card stat-card">
+                        <div class="stat-icon icon-green">
+                            <i class="fa-solid fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-data">
+                            <div class="stat-val" id="stats-revenue">0.00</div>
+                            <div class="stat-label">إجمالي المبيعات</div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card stat-card">
+                        <div class="stat-icon icon-orange">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <div class="stat-data">
+                            <div class="stat-val" id="stats-pending">0</div>
+                            <div class="stat-label">قيد التحضير</div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card stat-card">
+                        <div class="stat-icon icon-purple">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div class="stat-data">
+                            <div class="stat-val" id="stats-menu-count">0</div>
+                            <div class="stat-label">عدد الأصناف</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity / Latest Orders -->
+                <div class="admin-card">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid #eee; padding-bottom:1rem;">
+                        <h3 style="margin:0;">آخر النشاطات</h3>
+                        <a href="#orders" onclick="document.querySelector('.menu-link[href=\'#orders\']').click()"
+                            style="color:var(--admin-accent); text-decoration:none; font-size:0.9rem; font-weight:700;">عرض
+                            الكل</a>
+                    </div>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr
+                                style="text-align:right; color:#888; border-bottom:2px solid #f9f9f9; font-size:0.9rem;">
+                                <th style="padding:0.5rem;">رقم الطلب</th>
+                                <th style="padding:0.5rem;">التاريخ</th>
+                                <th style="padding:0.5rem;">الوقت</th>
+                                <th style="padding:0.5rem;">المبلغ</th>
+                                <th style="padding:0.5rem;">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-orders-table" style="font-size:0.95rem;">
+                            <!-- JS Injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Menu (Items) Section **(FOCUSED DESIGN)** -->
+            <section id="menu" class="admin-section" style="display:none;">
+
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>إدارة الأصناف</h1>
+                        <p>قم بإدارة قائمة الطعام وتوافر الأصناف والأسعار</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-new admin-only" onclick="openAddModal()">
+                            <i class="fa-solid fa-plus"></i> صنف جديد
+                        </button>
+                        <button class="btn-premium-outline admin-only" onclick="openCategoryModal()"
+                            title="إدارة التصنيفات">
+                            <i class="fa-solid fa-layer-group"></i> التصنيفات
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter & Search Bar -->
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="menu-search" placeholder="ابحث عن اسم الصنف...">
+                    </div>
+                    <div class="filter-tags" id="admin-category-filters">
+                        <!-- Categories will be rendered here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Items Container (Premium Grid) -->
+                <div id="admin-menu-container" class="items-grid">
+                    <!-- JS Generated Cards Go Here -->
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders" class="admin-section" style="display:none;">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>الطلبات</h1>
+                    </div>
+                </div>
+
+                <div id="orders-grid" class="orders-grid">
+                    <!-- JS Injected Cards -->
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="admin-section" style="display:none;">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>الإعدادات</h1>
+                        <p>تخصيص النظام وإدارة البيانات</p>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Store Profile -->
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-shop"></i> ملف المتجر</h3>
+                        <div class="settings-row">
+                            <label>اسم المطعم</label>
+                            <input type="text" id="setting-rest-name" placeholder="مثلاً: مطعم الشيف">
+                        </div>
+                        <div class="settings-row">
+                            <label>وصف المطعم</label>
+                            <input type="text" id="setting-rest-slogan" placeholder="أطيب المأكولات الشرقية">
+                        </div>
+
+                        <button onclick="saveStoreSettings()" class="btn-settings-save">
+                            <i class="fa-solid fa-floppy-disk"></i> حفظ الملف الشخصي
+                        </button>
+                    </div>
+
+
+
+                    <!-- System & Notifications -->
+                    <div class="settings-card">
+                        <h3><i class="fa-solid fa-bell"></i> التنبيهات والنظام</h3>
+
+                        <div class="switch-container">
+                            <div>
+                                <h4 style="margin:0; font-size: 0.9rem;">التنبيهات الصوتية</h4>
+                                <p class="settings-help">تشغيل صوت عند وصول طلب جديد</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="sound-toggle-input">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                            <button onclick="testNotificationSound()" class="test-sound-btn">
+                                <i class="fa-solid fa-volume-high"></i> تجربة صوت التنبيه
+                            </button>
+                        </div>
+
+                        <div class="delete-zone">
+                            <h4 style="margin:0; color:#d63031; font-size: 0.9rem;">إعادة تعيين البيانات</h4>
+                            <p class="settings-help">حذف جميع الأصناف والطلبات نهائياً من هذا المتصفح</p>
+                            <button onclick="app.resetData()" class="btn-danger-outline">
+                                <i class="fa-solid fa-trash-can"></i> مسح جميع البيانات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="admin-section" style="display:none;">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>المستخدمين</h1>
+                        <p>إدارة الحسابات وصلاحيات الوصول</p>
+                    </div>
+                    <button class="btn btn-new" onclick="openAddUserModal()">
+                        <i class="fa-solid fa-user-plus"></i>
+                        إضافة مستخدم
+                    </button>
+                </div>
+
+                <div class="admin-card">
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: right;">
+                            <thead>
+                                <tr>
+                                    <th
+                                        style="padding: 0.75rem 0.5rem; border-bottom: 2px solid #f1f2f6; font-size: 0.85rem;">
+                                        الاسم</th>
+                                    <th
+                                        style="padding: 0.75rem 0.5rem; border-bottom: 2px solid #f1f2f6; font-size: 0.85rem;">
+                                        اسم المستخدم</th>
+                                    <th
+                                        style="padding: 0.75rem 0.5rem; border-bottom: 2px solid #f1f2f6; font-size: 0.85rem;">
+                                        الصلاحية</th>
+                                    <th
+                                        style="padding: 0.75rem 0.5rem; border-bottom: 2px solid #f1f2f6; font-size: 0.85rem;">
+                                        الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <!-- JS Generated Users -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">تم الحفظ بنجاح</div>
+
+    <!-- Simple Add Modal -->
+    <div id="add-item-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إضافة صنف جديد</h2>
+                <button onclick="document.getElementById('add-item-modal').style.display='none'" class="close-btn"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-item-form">
+                    <input type="hidden" id="item-id">
+                    <div class="form-group">
+                        <label>اسم الصنف</label>
+                        <input type="text" id="item-name" required>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>السعر (د.ل)</label>
+                            <input type="number" step="0.5" id="item-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>القسم</label>
+                            <select id="item-cat" required>
+                                <!-- Categories will be populated here -->
+                            </select>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>صورة الصنف</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <input type="file" id="item-img-file" accept="image/*" style="padding: 0.5rem;">
+                            <input type="hidden" id="item-img-base64">
+                            <div id="img-preview-container"
+                                style="display: none; justify-content: center; margin-top: 0.5rem;">
+                                <img id="img-preview" src="" alt="Preview"
+                                    style="max-width: 100px; max-height: 100px; border-radius: 8px; object-fit: cover;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>الوصف</label>
+                        <textarea id="item-desc" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary full-width">حفظ الصنف</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal (Premium Redesign) -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content" style="max-width: 450px; border-radius: 20px;">
+            <div class="modal-header" style="border-bottom: none; padding: 1.5rem 1.5rem 0.5rem;">
+                <h2 style="font-size: 1.4rem; font-weight: 800;"><i class="fa-solid fa-user-gear"
+                        style="color: var(--admin-accent); margin-left: 10px;"></i> إدارة المستخدم</h2>
+                <span class="close" onclick="closeModal('user-modal')">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem;">
+                <form id="user-form" class="premium-form">
+                    <input type="hidden" id="user-id">
+
+                    <div class="form-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">الاسم
+                            الكامل</label>
+                        <div style="position: relative;">
+                            <i class="fa-solid fa-signature"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+                            <input type="text" id="user-display-name" placeholder="مثلاً: محمد علي" required
+                                style="width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem; border: 2px solid #edeff2; border-radius: 12px; outline: none; transition: 0.3s;">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">اسم
+                            المستخدم</label>
+                        <div style="position: relative;">
+                            <i class="fa-solid fa-at"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+                            <input type="text" id="user-username" placeholder="user123" required
+                                style="width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem; border: 2px solid #edeff2; border-radius: 12px; outline: none; transition: 0.3s; direction: ltr; text-align: right;">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.2rem;">
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">كلمة
+                            المرور</label>
+                        <div style="position: relative;">
+                            <i class="fa-solid fa-key"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+                            <input type="password" id="user-password" placeholder="••••••••" required
+                                style="width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem; border: 2px solid #edeff2; border-radius: 12px; outline: none; transition: 0.3s; direction: ltr; text-align: right;">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.8rem;">
+                        <label style="display: block; font-weight: 700; margin-bottom: 0.5rem; font-size: 0.9rem;">نوع
+                            الصلاحية</label>
+                        <div style="position: relative;">
+                            <i class="fa-solid fa-shield-halved"
+                                style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+                            <select id="user-role" class="form-control"
+                                style="width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem; border: 2px solid #edeff2; border-radius: 12px; outline: none; transition: 0.3s; background: #fff; appearance: none; cursor: pointer;">
+                                <option value="admin">مدير نظام - كامل الصلاحيات</option>
+                                <option value="employee">موظف - صلاحيات محدودة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary full-width"
+                        style="background: linear-gradient(135deg, var(--admin-accent) 0%, #27ae60 100%); border: none; padding: 1rem; border-radius: 12px; font-weight: 800; font-size: 1rem; box-shadow: 0 10px 20px rgba(46, 204, 113, 0.2); cursor: pointer; transition: 0.3s; color: #000;">
+                        <i class="fa-solid fa-floppy-disk" style="margin-left: 8px;"></i> حفظ بيانات المستخدم
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="category-modal" class="modal">
+        <div class="modal-content" style="max-width: 480px; border-radius: 20px;">
+            <div class="modal-header" style="border-bottom: none; padding: 1.5rem 1.5rem 0.5rem;">
+                <h2 style="font-size: 1.4rem; font-weight: 800;"><i class="fa-solid fa-layer-group"
+                        style="color: var(--admin-accent); margin-left: 10px;"></i> إدارة التصنيفات</h2>
+                <span class="close" onclick="closeModal('category-modal')">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div class="premium-search-group"
+                    style="margin-bottom: 2rem; background: #f8f9fa; padding: 1.25rem; border-radius: 16px; border: 1px solid #f1f2f6;">
+                    <label
+                        style="display: block; font-weight: 800; font-size: 0.85rem; color: #636e72; margin-bottom: 0.8rem;">إضافة
+                        تصنيف جديد</label>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <input type="text" id="new-cat-name" placeholder="مثلاً: وجبات سريعة، حلويات..."
+                            style="flex: 1; border-radius: 12px; border: 2px solid #edeff2; padding: 0.75rem 1rem; font-weight: 600; outline: none; transition: 0.3s;">
+                        <button onclick="handleAddCategory()" class="btn-new btn-plus admin-only">
+                            +
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <label style="font-weight: 800; font-size: 0.9rem; color: var(--admin-text);">التصنيفات
+                        الحالية</label>
+                    <span id="cat-count-badge"
+                        style="background: #f1f2f6; color: #7f8c8d; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;">0</span>
+                </div>
+
+                <div id="category-list-container" class="cat-manage-list">
+                    <!-- JS Generated Category Rows -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utility Modals (Placed last for correct z-index/stacking) -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content" style="max-width: 340px; text-align: center; border-radius: 12px;">
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div id="confirm-icon" style="font-size: 2rem; margin-bottom: 0.8rem;"></div>
+                <h3 id="confirm-title" style="margin-bottom: 0.5rem; font-size: 1.1rem;"></h3>
+                <p id="confirm-msg" style="color: #666; margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.4;">
+                </p>
+                <div style="display: flex; gap: 0.8rem; justify-content: center;">
+                    <button id="confirm-yes-btn" class="btn btn-primary"
+                        style="background-color: var(--admin-danger); border:none; padding: 0.6rem 1.2rem; font-size: 0.9rem;">نعم</button>
+                    <button onclick="closeModal('confirm-modal')" class="btn"
+                        style="background:#f1f2f6; color:#333; padding: 0.6rem 1.2rem; border-radius: 8px; border:none; font-weight:700; cursor:pointer; font-size: 0.9rem;">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="prompt-modal" class="modal">
+        <div class="modal-content" style="max-width: 320px; text-align: center; border-radius: 12px;">
+            <div class="modal-body" style="padding: 1.5rem;">
+                <h3 id="prompt-title" style="margin-bottom: 1rem; font-size: 1.1rem;"></h3>
+                <input type="text" id="prompt-input" class="form-control"
+                    style="margin-bottom: 1.2rem; text-align: center; width: 100%; box-sizing: border-box; padding: 0.8rem; font-size: 1rem;"
+                    placeholder="...">
+                <div style="display: flex; gap: 0.8rem; justify-content: center;">
+                    <button id="prompt-ok-btn" class="btn btn-primary"
+                        style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">موافق</button>
+                    <button onclick="closeModal('prompt-modal')" class="btn"
+                        style="background:#f1f2f6; color:#333; padding: 0.6rem 1.2rem; border-radius: 8px; border:none; font-weight:700; cursor:pointer; font-size: 0.9rem;">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="print-receipt-area" class="print-only"></div>
+</body>
+
+</html>
